@@ -47,7 +47,7 @@ public class ParityServlet extends HttpServlet {
             String generatedBits = inputBits.toString();
 
             //kodowanie bitów
-            CodeBase transmitter;
+            CodeBase transmitter = null;
             String title = "";
             switch (request.getParameter("typeOf")) {
                 case "parity":
@@ -120,14 +120,7 @@ public class ParityServlet extends HttpServlet {
                     transmitter = (CodeBase) crcTransmitter;
                     break;
                 }
-                default:
-                    {
-                        //ten default to przez to, ze IDE na mnie drze ryja, ze jestem debil bo go nie dalem, pozniej cos wymysle
-                        
-                        Parity parityTransmitter = new Parity();
-                        transmitter = (CodeBase) parityTransmitter;
-                        break;
-                    }
+                
             }
             transmitter.setData(generatedBits);
             transmitter.encode();
