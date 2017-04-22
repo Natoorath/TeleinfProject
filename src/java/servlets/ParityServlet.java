@@ -8,6 +8,7 @@ package servlets;
 import errordetection.DataBits;
 import errordetection.Parity;
 import errordetection.Hamming;
+import errordetection.Crc;
 import errordetection.CodeBase;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -47,17 +48,78 @@ public class ParityServlet extends HttpServlet {
 
             //kodowanie bitów
             CodeBase transmitter;
+            String title = "";
             switch (request.getParameter("typeOf")) {
                 case "parity":
-                    {
-                        Parity parityTransmitter = new Parity();
-                        transmitter = (CodeBase) parityTransmitter;
-                        break;
-                    }
+                {
+                    title = "Bit parzystości";
+                    Parity parityTransmitter = new Parity();
+                    transmitter = (CodeBase) parityTransmitter;
+                    break;
+                }
                 case "hamming":
+                {
+                    title = "Kodowanie Hamminga";
                     Hamming hammingTransmitter = new Hamming();
                     transmitter = (CodeBase) hammingTransmitter;
                     break;
+                }
+                case "crc-atm":
+                {
+                    title = "Kodowanie CRC ATM";
+                    Crc crcTransmitter = new Crc();
+                    crcTransmitter.setKey(Crc.ATM);
+                    transmitter = (CodeBase) crcTransmitter;
+                    break;
+                }
+                case "crc-12":
+                {
+                    title = "Kodowanie CRC-12";
+                    Crc crcTransmitter = new Crc();
+                    crcTransmitter.setKey(Crc.CRC12);
+                    transmitter = (CodeBase) crcTransmitter;
+                    break;
+                }
+                case "crc-16":
+                {
+                    title = "Kodowanie CRC-16";
+                    Crc crcTransmitter = new Crc();
+                    crcTransmitter.setKey(Crc.CRC16);
+                    transmitter = (CodeBase) crcTransmitter;
+                    break;
+                }
+                case "crc-16R":
+                {
+                    title = "Kodowanie CRC-16 Reverse";
+                    Crc crcTransmitter = new Crc();
+                    crcTransmitter.setKey(Crc.CRC16_REVERSE);
+                    transmitter = (CodeBase) crcTransmitter;
+                    break;
+                }
+                case "crc-sdlc":
+                {
+                    title = "Kodowanie CRC-SDLC";
+                    Crc crcTransmitter = new Crc();
+                    crcTransmitter.setKey(Crc.SDLC);
+                    transmitter = (CodeBase) crcTransmitter;
+                    break;
+                }
+                case "crc-sdlcR":
+                {
+                    title = "Kodowanie CRC-SDLC Reverse";
+                    Crc crcTransmitter = new Crc();
+                    crcTransmitter.setKey(Crc.SDLC_REVERSE);
+                    transmitter = (CodeBase) crcTransmitter;
+                    break;
+                }
+                case "crc-32":
+                {
+                    title = "Kodowanie CRC-32";
+                    Crc crcTransmitter = new Crc();
+                    crcTransmitter.setKey(Crc.CRC32);
+                    transmitter = (CodeBase) crcTransmitter;
+                    break;
+                }
                 default:
                     {
                         //ten default to przez to, ze IDE na mnie drze ryja, ze jestem debil bo go nie dalem, pozniej cos wymysle
@@ -85,7 +147,7 @@ public class ParityServlet extends HttpServlet {
             transmitter.decode();
             //odkodowane
             String decodeData = transmitter.dataToString();
-            int errors = countErrors(generatedBits, decodeData);
+            int errors = countErrors(encodeBits, errorBits);
             //ilosc bitów
             String dataBits = Integer.toString(transmitter.getDataBitsNumber());
             //bity kontrolne
@@ -97,11 +159,12 @@ public class ParityServlet extends HttpServlet {
             String fixesErrors = Integer.toString(transmitter.getFixedErrorsNumber());
             //niewykryte
             String notDetectedErrors = Integer.toString(errors - detected);
-            
+            System.out.println(errors);
+            System.out.println(detected);
+            System.out.println(errors-detected);
             Map values = new LinkedHashMap() {};
             values.put( "Liczba bitów", errorAmount);
             values.put( "Liczba zakłóceń", bitAmount);
-            values.put( "Wygenerowane", generatedBits);
             values.put( "Wygenerowane", generatedBits);
             values.put( "Zakodowane", encodeBits);
             values.put( "Zakłócone", errorBits);
@@ -123,7 +186,8 @@ public class ParityServlet extends HttpServlet {
             out.println("<title>Servlet BitGenarator</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Parzystość</h1>");
+            
+            out.println("<h1>"+title+"</h1>");
             printTable(out, (HashMap) values);
             out.println("</body>");
             out.println("</html>");
@@ -183,7 +247,7 @@ public class ParityServlet extends HttpServlet {
             return errors;
         }
     }
-    
+  	
     private void printTable(PrintWriter out, HashMap values )
     {
         out.println("<table border=1>");
